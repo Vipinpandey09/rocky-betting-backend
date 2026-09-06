@@ -15,7 +15,8 @@ const envSchema = z.object({
   REFRESH_TOKEN_TTL: z.string().default("7d"),
   CORS_ORIGIN: z.string().default("http://localhost:3000,http://localhost:3001"),
   CRICAPI_KEY: z.string().default(""),
-  APISPORTS_KEY: z.string().default("")
+  APISPORTS_KEY: z.string().default(""),
+  THE_ODDS_API_KEY: z.string().default("")
 });
 
 export const env = envSchema.parse(process.env);

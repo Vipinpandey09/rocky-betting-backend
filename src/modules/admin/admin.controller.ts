@@ -4,6 +4,7 @@ import { usersRepository } from "../users/users.repository.js";
 import { matchesService } from "../matches/matches.service.js";
 import { oddsService } from "../odds/odds.service.js";
 import { settlementService } from "../settlement/settlement.service.js";
+import { walletsService } from "../wallets/wallets.service.js";
 
 export async function listUsersController(request: FastifyRequest) {
   const { search } = request.query as { search?: string };
@@ -19,6 +20,11 @@ export async function updateUserStatusController(request: FastifyRequest) {
 export async function startMatchController(request: FastifyRequest) {
   const { id } = request.params as { id: string };
   return matchesService.start(id);
+}
+
+export async function nextBallController(request: FastifyRequest) {
+  const { id } = request.params as { id: string };
+  return matchesService.nextBall(id);
 }
 
 export async function finishMatchController(request: FastifyRequest) {
@@ -61,4 +67,24 @@ export async function getReportSummaryController() {
     stake: Number(bets?.stake ?? 0),
     deposits: Number(deposits?.amount ?? 0)
   };
+}
+
+export async function approveDepositController(request: FastifyRequest) {
+  const { id } = request.params as { id: string };
+  return walletsService.approveDeposit(id);
+}
+
+export async function rejectDepositController(request: FastifyRequest) {
+  const { id } = request.params as { id: string };
+  return walletsService.rejectDeposit(id);
+}
+
+export async function approveWithdrawalController(request: FastifyRequest) {
+  const { id } = request.params as { id: string };
+  return walletsService.approveWithdraw(id);
+}
+
+export async function rejectWithdrawalController(request: FastifyRequest) {
+  const { id } = request.params as { id: string };
+  return walletsService.rejectWithdraw(id);
 }

@@ -187,8 +187,12 @@ class CricketService {
   }
 
   async syncMatchesToDatabase(): Promise<void> {
-    if (Date.now() - this.lastSyncedAt < this.SYNC_INTERVAL) {
-      return; // Already synced recently
+    const hasKey = Boolean(KEY && KEY.length > 0);
+
+    if (hasKey) {
+      if (Date.now() - this.lastSyncedAt < this.SYNC_INTERVAL) {
+        return; // Already synced recently
+      }
     }
 
     // 1. Ensure cricket sport exists
@@ -209,20 +213,24 @@ class CricketService {
         .executeTakeFirstOrThrow();
     }
 
-    // Fetch matches from CricAPI
+    // Fetch matches
     let matches: CricMatch[] = [];
-    try {
-      const current = await this.getCurrentMatches();
-      matches = matches.concat(current);
-    } catch (err) {
-      console.error("Error fetching current matches:", err);
-    }
+    if (hasKey) {
+      try {
+        const current = await this.getCurrentMatches();
+        matches = matches.concat(current);
+      } catch (err) {
+        console.error("Error fetching current cricket matches:", err);
+      }
 
-    try {
-      const upcoming = await this.getUpcomingMatches();
-      matches = matches.concat(upcoming);
-    } catch (err) {
-      console.error("Error fetching upcoming matches:", err);
+      try {
+        const upcoming = await this.getUpcomingMatches();
+        matches = matches.concat(upcoming);
+      } catch (err) {
+        console.error("Error fetching upcoming cricket matches:", err);
+      }
+    } else {
+      matches = [];
     }
 
     if (matches.length === 0) {

@@ -69,8 +69,13 @@ class LiveCasinoDataService {
 
   async getGames(window = "30d") {
     return this.cached(`games:${window}`, async () => {
-      const json = await this.fetchJson<LiveCasinoGamesResponse>(`/games?window=${encodeURIComponent(window)}`);
-      return json.games ?? [];
+      try {
+        const json = await this.fetchJson<LiveCasinoGamesResponse>(`/games?window=${encodeURIComponent(window)}`);
+        return json.games ?? [];
+      } catch (err) {
+        console.error("Failed to fetch live casino games from API:", err);
+        return [];
+      }
     });
   }
 
@@ -92,3 +97,4 @@ class LiveCasinoDataService {
 
 export const liveCasinoDataService = new LiveCasinoDataService();
 export type { LiveCasinoGame, LiveCasinoGamesResponse, LiveCasinoGameResponse, LiveCasinoStatsResponse, LiveCasinoFairnessResponse };
+

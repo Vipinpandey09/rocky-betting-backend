@@ -29,7 +29,11 @@ export class BetsService {
         if (odds.length !== input.selections.length)
             throw new AppError("One or more odds were not found", 404, "ODDS_NOT_FOUND");
         const now = Date.now();
-        if (odds.some((odd) => odd.odd_status !== "ACTIVE" || odd.market_status !== "OPEN" || odd.match_status !== "SCHEDULED" || new Date(odd.match_starts_at).getTime() <= now)) {
+        if (odds.some((odd) => {
+            const isLiveOrScheduled = ["SCHEDULED", "LIVE"].includes(odd.match_status);
+            const isTimeValid = odd.match_status === "LIVE" || new Date(odd.match_starts_at).getTime() > now;
+            return odd.odd_status !== "ACTIVE" || odd.market_status !== "OPEN" || !isLiveOrScheduled || !isTimeValid;
+        })) {
             throw new AppError("One or more selections are unavailable", 400, "SELECTION_UNAVAILABLE");
         }
         const totalOdds = odds.reduce((acc, odd) => acc * Number(odd.price), 1);

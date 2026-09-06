@@ -167,11 +167,32 @@ class ApiSportsService {
   }
 
   async syncSportMatchesToDatabase(sport: SupportedSport): Promise<void> {
-    if (!this.getKey()) {
-      return;
+    const hasKey = Boolean(this.getKey() && this.getKey().length > 0);
+
+    if (hasKey) {
+      if (Date.now() - (this.lastSynced.get(sport) ?? 0) < this.syncInterval) {
+        return;
+      }
     }
 
-    if (Date.now() - (this.lastSynced.get(sport) ?? 0) < this.syncInterval) {
+    let mergedMatches: ApiSportsMatch[] = [];
+    if (hasKey) {
+      try {
+        const matches = await Promise.all([
+          this.getMatches(sport, "live"),
+          this.getMatches(sport, "upcoming")
+        ]);
+        mergedMatches = matches.flat();
+      } catch (err) {
+        console.error(`Failed to fetch API-Sports matches for ${sport}:`, err);
+        mergedMatches = [];
+      }
+    } else {
+      mergedMatches = [];
+    }
+
+    if (mergedMatches.length === 0) {
+      this.lastSynced.set(sport, Date.now());
       return;
     }
 
@@ -181,17 +202,6 @@ class ApiSportsService {
         .values({ name: SPORT_CONFIG[sport].sportName, slug: sport, active: true })
         .returningAll()
         .executeTakeFirstOrThrow();
-    }
-
-    const matches = await Promise.all([
-      this.getMatches(sport, "live"),
-      this.getMatches(sport, "upcoming")
-    ]);
-
-    const mergedMatches = matches.flat();
-    if (mergedMatches.length === 0) {
-      this.lastSynced.set(sport, Date.now());
-      return;
     }
 
     const seen = new Set<string>();

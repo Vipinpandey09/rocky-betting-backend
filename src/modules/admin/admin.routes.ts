@@ -18,8 +18,13 @@ import {
   listWithdrawalsController,
   settleBetController,
   startMatchController,
+  nextBallController,
   updateOddsPriceController,
-  updateUserStatusController
+  updateUserStatusController,
+  approveDepositController,
+  rejectDepositController,
+  approveWithdrawalController,
+  rejectWithdrawalController
 } from "./admin.controller.js";
 
 const basePath = "/api/admin";
@@ -35,6 +40,10 @@ export async function updateUserStatus(app: FastifyInstance) {
 
 export async function startMatch(app: FastifyInstance) {
   app.post(`${basePath}/matches/:id/start`, { preHandler: [...adminAuth, validateParams(idParamSchema)] }, startMatchController);
+}
+
+export async function nextBall(app: FastifyInstance) {
+  app.post(`${basePath}/matches/:id/next-ball`, { preHandler: [...adminAuth, validateParams(idParamSchema)] }, nextBallController);
 }
 
 export async function finishMatch(app: FastifyInstance) {
@@ -63,4 +72,20 @@ export async function listAuditLogs(app: FastifyInstance) {
 
 export async function getReportSummary(app: FastifyInstance) {
   app.get(`${basePath}/reports/summary`, { preHandler: adminAuth }, getReportSummaryController);
+}
+
+export async function approveDeposit(app: FastifyInstance) {
+  app.post(`${basePath}/deposits/:id/approve`, { preHandler: [...adminAuth, validateParams(idParamSchema)] }, approveDepositController);
+}
+
+export async function rejectDeposit(app: FastifyInstance) {
+  app.post(`${basePath}/deposits/:id/reject`, { preHandler: [...adminAuth, validateParams(idParamSchema)] }, rejectDepositController);
+}
+
+export async function approveWithdrawal(app: FastifyInstance) {
+  app.post(`${basePath}/withdrawals/:id/approve`, { preHandler: [...adminAuth, validateParams(idParamSchema)] }, approveWithdrawalController);
+}
+
+export async function rejectWithdrawal(app: FastifyInstance) {
+  app.post(`${basePath}/withdrawals/:id/reject`, { preHandler: [...adminAuth, validateParams(idParamSchema)] }, rejectWithdrawalController);
 }

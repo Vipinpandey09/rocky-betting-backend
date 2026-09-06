@@ -78,6 +78,8 @@ export interface MatchTable {
   away_score: Generated<number>;
   created_at: Timestamp;
   updated_at: Timestamp;
+  last_ball_started_at: Timestamp | null;
+  ball_number: Generated<number>;
 }
 
 export interface MarketTable {
@@ -125,7 +127,7 @@ export interface DepositTable {
   id: Generated<string>;
   user_id: string;
   amount: Numeric;
-  status: "PENDING" | "COMPLETED" | "FAILED";
+  status: "PENDING" | "COMPLETED" | "FAILED" | "REJECTED";
   created_at: Timestamp;
 }
 
@@ -133,7 +135,7 @@ export interface WithdrawalTable {
   id: Generated<string>;
   user_id: string;
   amount: Numeric;
-  status: "PENDING" | "APPROVED" | "REJECTED" | "PAID";
+  status: "PENDING" | "APPROVED" | "REJECTED" | "PAID" | "COMPLETED";
   created_at: Timestamp;
 }
 

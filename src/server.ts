@@ -1,6 +1,11 @@
 import cors from "@fastify/cors";
 import jwtPlugin from "@fastify/jwt";
 import rateLimit from "@fastify/rate-limit";
+import { promises as fs } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { Migrator, FileMigrationProvider } from "kysely";
+import { db } from "./lib/db.js";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import Fastify from "fastify";
@@ -43,6 +48,22 @@ await searchService.ensureIndexes().catch((error) => {
   app.log.warn({ error }, "Elasticsearch indexes were not initialized");
 });
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const migrator = new Migrator({
+  db,
+  provider: new FileMigrationProvider({
+    fs,
+    path,
+    migrationFolder: path.join(__dirname, "database", "migrations")
+  })
+});
+
+const { error: migrationError, results } = await migrator.migrateToLatest();
+results?.forEach((result) => app.log.info(`Migration ${result.migrationName}: ${result.status}`));
+if (migrationError) {
+  app.log.error(migrationError, "Failed to run database migrations");
+}
+
 const start = async () => {
   try {
     await app.listen({ port: env.PORT, host: "0.0.0.0" });
@@ -52,4 +73,5 @@ const start = async () => {
   }
 };
 
+// Initialize and launch the fastify app
 void start();

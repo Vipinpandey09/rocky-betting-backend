@@ -1,7 +1,8 @@
 import type { FastifyInstance } from "fastify";
 import { validateParams, validateQuery } from "../../lib/validation.js";
 import { liveCasinoGameParamsSchema, liveCasinoGamesQuerySchema } from "./live-casino.schemas.js";
-import { getFairnessController, getGameController, getGamesController, getStatsController } from "./live-casino.controller.js";
+import { getFairnessController, getGameController, getGamesController, getStatsController, placeCasinoBetController } from "./live-casino.controller.js";
+import { authenticate } from "../auth/auth.middleware.js";
 
 const basePath = "/api/live-casino";
 
@@ -20,3 +21,8 @@ export async function getStats(app: FastifyInstance) {
 export async function getFairness(app: FastifyInstance) {
   app.get(`${basePath}/fairness`, getFairnessController);
 }
+
+export async function placeCasinoBet(app: FastifyInstance) {
+  app.post(`${basePath}/bet`, { preHandler: [authenticate] }, placeCasinoBetController);
+}
+
